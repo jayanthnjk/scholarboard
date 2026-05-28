@@ -50,9 +50,13 @@ void GraduationCap;
 // --- MSW Initialization ---
 
 async function initMockServer(): Promise<void> {
-  // Always enable MSW - this app uses mock data as its backend
-  const { startMockServer } = await import('@/mock');
-  await startMockServer({ quiet: true });
+  try {
+    const { startMockServer } = await import('@/mock');
+    await startMockServer({ quiet: true });
+  } catch (e) {
+    // MSW failed to start (e.g., service worker not available) - continue without it
+    console.warn('[MSW] Failed to start mock server:', e);
+  }
 }
 
 // --- Layout Shell ---
@@ -335,7 +339,12 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     if (!mswReady) {
-      initMockServer().then(() => setMswReady(true)).catch(() => setMswReady(true));
+      initMockServer()
+        .then(() => setMswReady(true))
+        .catch(() => setMswReady(true));
+      // Timeout fallback - if MSW doesn't start in 3 seconds, proceed anyway
+      const timeout = setTimeout(() => setMswReady(true), 3000);
+      return () => clearTimeout(timeout);
     }
   }, [mswReady]);
 
