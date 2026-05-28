@@ -50,10 +50,9 @@ void GraduationCap;
 // --- MSW Initialization ---
 
 async function initMockServer(): Promise<void> {
-  if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'true') {
-    const { startMockServer } = await import('@/mock');
-    await startMockServer({ quiet: false });
-  }
+  // Always enable MSW - this app uses mock data as its backend
+  const { startMockServer } = await import('@/mock');
+  await startMockServer({ quiet: true });
 }
 
 // --- Layout Shell ---
@@ -332,9 +331,7 @@ function AppRoutes(): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-  const [mswReady, setMswReady] = useState(
-    !(import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'true')
-  );
+  const [mswReady, setMswReady] = useState(false);
 
   useEffect(() => {
     if (!mswReady) {
