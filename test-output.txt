@@ -1,0 +1,10 @@
+
+ RUN  v2.0.0 C:/Users/617433314/OneDrive - BT Plc/Documents/learning_path/Ai learnings/ERP/education
+
+ ✓ src/__tests__/bug-condition-exploration.test.tsx  (13 tests) 141ms
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  00:11:28
+   Duration  5.17s (transform 208ms, setup 136ms, collect 747ms, tests 141ms, environment 382ms, prepare 173ms)
+
