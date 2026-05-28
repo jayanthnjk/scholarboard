@@ -3,7 +3,7 @@
  * Sets up providers, routing, layout shell, and MSW mock server.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AppProviders } from '@/providers/AppProviders';
 import { RouteGuard } from '@/components/RouteGuard';
@@ -46,18 +46,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 import { GraduationCap } from 'lucide-react'; // Used in banner conditionally
 void GraduationCap;
-
-// --- MSW Initialization ---
-
-async function initMockServer(): Promise<void> {
-  try {
-    const { startMockServer } = await import('@/mock');
-    await startMockServer({ quiet: true });
-  } catch (e) {
-    // MSW failed to start (e.g., service worker not available) - continue without it
-    console.warn('[MSW] Failed to start mock server:', e);
-  }
-}
 
 // --- Layout Shell ---
 
@@ -334,28 +322,9 @@ function AppRoutes(): React.JSX.Element {
   );
 }
 
+// --- App Root ---
+
 function App(): React.JSX.Element {
-  const [mswReady, setMswReady] = useState(false);
-
-  useEffect(() => {
-    if (!mswReady) {
-      initMockServer()
-        .then(() => setMswReady(true))
-        .catch(() => setMswReady(true));
-      // Timeout fallback - if MSW doesn't start in 3 seconds, proceed anyway
-      const timeout = setTimeout(() => setMswReady(true), 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [mswReady]);
-
-  if (!mswReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-      </div>
-    );
-  }
-
   return (
     <AppProviders>
       <AppRoutes />

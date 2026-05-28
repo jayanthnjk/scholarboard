@@ -99,63 +99,47 @@ class SessionManagerImpl {
 
   /**
    * Authenticate user with credentials.
-   * On success, stores tokens and sets up idle detection.
+   * Uses local validation - no API calls needed.
    */
   async login(credentials: LoginCredentials): Promise<AuthResult> {
-    try {
-      const result = await post<AuthResult>('/auth/login', {
-        email: credentials.email,
-        password: credentials.password,
-        rememberMe: credentials.rememberMe,
-        mfaCode: credentials.mfaCode,
-      }, { skipCircuitBreaker: true, maxRetries: 0 });
+    // Local demo accounts
+    const DEMO_USERS: Record<string, { password: string; user: AuthenticatedUser }> = {
+      'admin@sunriseacademy.edu': { password: 'Admin@123', user: { id: 'u1', email: 'admin@sunriseacademy.edu', name: 'System Admin', role: 'super_admin', tenantId: 'tenant_sunrise', avatar: '', permissions: ['*'] } },
+      'principal@sunriseacademy.edu': { password: 'Principal@123', user: { id: 'u2', email: 'principal@sunriseacademy.edu', name: 'Dr. Priya Sharma', role: 'school_admin', tenantId: 'tenant_sunrise', avatar: '', permissions: ['*'] } },
+      'accounts@sunriseacademy.edu': { password: 'Accounts@123', user: { id: 'u3', email: 'accounts@sunriseacademy.edu', name: 'Suresh Patel', role: 'accountant', tenantId: 'tenant_sunrise', avatar: '', permissions: ['fees', 'reports', 'students.view'] } },
+      'teacher.math@sunriseacademy.edu': { password: 'Teacher@123', user: { id: 'u4', email: 'teacher.math@sunriseacademy.edu', name: 'Smt. Lakshmi Devi', role: 'teacher', tenantId: 'tenant_sunrise', avatar: '', permissions: ['students.view', 'attendance', 'exams'] } },
+      'student.arjun@sunriseacademy.edu': { password: 'Student@123', user: { id: 'u5', email: 'student.arjun@sunriseacademy.edu', name: 'Arjun Reddy', role: 'student', tenantId: 'tenant_sunrise', avatar: '', permissions: ['profile.view'] } },
+      'parent.sharma@gmail.com': { password: 'Parent@123', user: { id: 'u6', email: 'parent.sharma@gmail.com', name: 'Meera Sharma', role: 'parent', tenantId: 'tenant_sunrise', avatar: '', permissions: ['students.view.own'] } },
+    };
 
-      if (result.status === 'success') {
-        this.setSession(result.token, result.refreshToken, result.user, result.expiresAt);
-
-        if (credentials.rememberMe) {
-          localStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
-        }
-
-        this.logEvent('login', `User ${result.user.email} logged in`);
-        this.startIdleDetection();
-        this.scheduleTokenRefresh();
-      }
-
-      return result;
-    } catch (error) {
-      // If it's a 401 with "invalid credentials" message, return as failed (not throw)
-      if (error instanceof Error && 'status' in error) {
-        const apiErr = error as Error & { status: number; message: string };
-        if (apiErr.status === 401) {
-          return { status: 'failed', error: apiErr.message || 'Invalid email or password' };
-        }
-        if (apiErr.status === 422) {
-          return { status: 'failed', error: apiErr.message || 'Validation failed' };
-        }
-        if (apiErr.status === 429) {
-          return { status: 'failed', error: 'Too many attempts. Please try again later.' };
-        }
-      }
-      throw error instanceof Error ? error : new Error('Login failed');
+    const account = DEMO_USERS[credentials.email];
+    if (!account || account.password !== credentials.password) {
+      return { status: 'failed', error: 'Invalid email or password' };
     }
+
+    const token = `local_token_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const refreshToken = `local_refresh_${Date.now()}`;
+    const expiresAt = Date.now() + (credentials.rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000);
+
+    this.setSession(token, refreshToken, account.user, expiresAt);
+
+    if (credentials.rememberMe) {
+      localStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
+    }
+
+    this.logEvent('login', `User ${account.user.email} logged in`);
+    this.startIdleDetection();
+
+    return { status: 'success', token, refreshToken, user: account.user, expiresAt };
   }
 
   /**
    * Logout the current user, clean up all state, and notify other tabs.
    */
   async logout(): Promise<void> {
-    try {
-      if (this.token) {
-        await post('/auth/logout', { token: this.token }).catch(() => {
-          // Silent fail on logout API call
-        });
-      }
-    } finally {
-      this.logEvent('logout', 'User logged out');
-      this.broadcastMessage({ type: 'logout', reason: 'user-initiated' });
-      this.clearSession();
-    }
+    this.logEvent('logout', 'User logged out');
+    this.broadcastMessage({ type: 'logout', reason: 'user-initiated' });
+    this.clearSession();
   }
 
   /**
