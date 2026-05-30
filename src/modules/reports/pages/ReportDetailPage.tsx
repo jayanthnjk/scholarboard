@@ -11,6 +11,7 @@ import {
   Calendar, RefreshCw, Printer,
 } from 'lucide-react';
 import { REPORT_DEFINITIONS, CATEGORY_META } from '../data';
+import { generateReportPDF } from '@/utils/receipt-generator';
 import type { ReportCategory } from '../data';
 
 // --- Mock report data generators ---
@@ -148,8 +149,12 @@ export function ReportDetailPage(): React.JSX.Element {
   const { columns, rows } = getReportData(report.category);
 
   function handleExport(): void {
+    if (!report) return;
     setIsGenerating(true);
-    setTimeout(() => setIsGenerating(false), 1500);
+    setTimeout(() => {
+      generateReportPDF(report.name, columns, rows as Record<string, string | number>[]);
+      setIsGenerating(false);
+    }, 500);
   }
 
   return (

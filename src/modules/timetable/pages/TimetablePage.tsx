@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 import { PageHeader } from '@/components/layout/page-header';
 import { PageContent } from '@/components/layout/page-content';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, X, Edit2, Trash2, Clock } from 'lucide-react';
+import { Plus, X, Edit2, Trash2, Clock, Download } from 'lucide-react';
+import { generateTimetablePDF } from '@/utils/receipt-generator';
 
 interface Period {
   id: string; day: string; timeSlot: string; subject: string; faculty: string; room: string;
@@ -92,6 +93,8 @@ export function TimetablePage(): React.JSX.Element {
         </div>
         <button type="button" onClick={() => { setEditingPeriod(null); setForm({ day: 'Monday', timeSlot: '8:30-9:20', subject: '', faculty: '', room: '' }); setShowModal(true); }}
           className="inline-flex items-center gap-2 rounded-lg bg-[#363473] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1B1D3A] transition-colors"><Plus className="h-4 w-4" /> Add Period</button>
+        <button type="button" onClick={() => generateTimetablePDF(selectedCourse, periods)}
+          className="inline-flex items-center gap-2 rounded-lg border border-[#ECEDF3] px-4 py-2.5 text-sm font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors"><Download className="h-4 w-4" /> Download PDF</button>
       </div>
 
       {/* Timetable Grid */}

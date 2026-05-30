@@ -9,8 +9,9 @@ import { PageHeader } from '@/components/layout/page-header';
 import { PageContent } from '@/components/layout/page-content';
 import {
   Search, ChevronLeft, ChevronRight, Plus, Users,
-  GraduationCap, CheckCircle, UserX, Trash2,
+  GraduationCap, CheckCircle, UserX, Trash2, Download,
 } from 'lucide-react';
+import { generateStudentListPDF } from '@/utils/receipt-generator';
 
 type StudentStatus = 'Active' | 'Inactive' | 'Graduated' | 'Transferred';
 
@@ -91,7 +92,10 @@ function StudentListPage(): React.JSX.Element {
         <div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A0A3BD]" /><input type="text" placeholder="Search name, ID, email..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }} className="rounded-lg border border-[#ECEDF3] bg-white pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#363473] w-[240px]" /></div>
         <select value={filterCourse} onChange={(e) => { setFilterCourse(e.target.value); setPage(1); }} className="rounded-lg border border-[#ECEDF3] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#363473]"><option value="All">All Courses</option>{COURSES.map((c) => <option key={c} value={c}>{c}</option>)}</select>
         <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value as StudentStatus | 'All'); setPage(1); }} className="rounded-lg border border-[#ECEDF3] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#363473]"><option value="All">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Graduated">Graduated</option><option value="Transferred">Transferred</option></select>
-        <div className="ml-auto"><button type="button" onClick={() => navigate('/admissions')} className="inline-flex items-center gap-2 rounded-lg bg-[#363473] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1B1D3A] transition-colors"><Plus className="h-4 w-4" /> New Admission</button></div>
+        <div className="ml-auto flex items-center gap-2">
+          <button type="button" onClick={() => generateStudentListPDF(filtered.map((s) => ({ name: s.name, studentId: s.studentId, course: s.course, section: s.section, year: s.year, phone: s.phone, status: s.status, attendance: s.attendance })), `${filterCourse !== 'All' ? filterCourse : 'All Courses'} ${filterStatus !== 'All' ? filterStatus : ''}`)} className="inline-flex items-center gap-2 rounded-lg border border-[#ECEDF3] px-4 py-2.5 text-sm font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors"><Download className="h-4 w-4" /> Download List</button>
+          <button type="button" onClick={() => navigate('/admissions')} className="inline-flex items-center gap-2 rounded-lg bg-[#363473] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1B1D3A] transition-colors"><Plus className="h-4 w-4" /> New Admission</button>
+        </div>
       </div>
 
       {/* Table */}

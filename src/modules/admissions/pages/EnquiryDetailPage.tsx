@@ -11,8 +11,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft, User, Mail, Phone, GraduationCap, Building2,
   FileText, Calendar, CheckCircle, XCircle, ArrowRight,
-  ClipboardCheck, UserCheck, MessageSquare, Gift, UserPlus,
+  ClipboardCheck, UserCheck, MessageSquare, Gift, UserPlus, Download,
 } from 'lucide-react';
+import { generateAdmissionReceipt } from '@/utils/receipt-generator';
 
 // --- Types ---
 
@@ -294,6 +295,16 @@ export function EnquiryDetailPage(): React.JSX.Element {
               >
                 {NEXT_ACTION_LABELS[enquiry.status]}
                 <ArrowRight className="h-4 w-4" />
+              </button>
+
+              {/* Download Receipt */}
+              <button
+                type="button"
+                onClick={() => generateAdmissionReceipt({ enquiryId: enquiry.id, studentName: enquiry.name, course: enquiry.course, email: enquiry.email, phone: enquiry.phone, status: enquiry.status, date: enquiry.date })}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#ECEDF3] bg-white px-5 py-2.5 text-sm font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Download Receipt
               </button>
 
               {/* Reject action */}

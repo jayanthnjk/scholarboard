@@ -11,8 +11,9 @@ import { usePermission } from '@/hooks/usePermission';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   IndianRupee, Users, AlertTriangle, TrendingUp,
-  ChevronLeft, ChevronRight, Search, XCircle, Pencil, X, Plus,
+  ChevronLeft, ChevronRight, Search, XCircle, Pencil, X, Plus, Download,
 } from 'lucide-react';
+import { generateFeeReceipt } from '@/utils/receipt-generator';
 
 // --- Types ---
 type TabKey = 'paid' | 'overdue' | 'defaulters' | 'structure';
@@ -229,6 +230,7 @@ export function FeesOverviewPage(): React.JSX.Element {
                   <th className="px-4 py-3 text-left font-semibold text-[#1B1D3A]">Method</th>
                   <th className="px-4 py-3 text-left font-semibold text-[#1B1D3A]">Status</th>
                   <th className="px-4 py-3 text-left font-semibold text-[#1B1D3A]">Date</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[#1B1D3A]">Receipt</th>
                 </tr></thead>
                 <tbody>
                   {(paginated as PaymentRecord[]).map((p) => { const badge = getStatusBadge(p.status); return (
@@ -242,6 +244,7 @@ export function FeesOverviewPage(): React.JSX.Element {
                       <td className="px-4 py-3 text-[#6E7191]">{p.method}</td>
                       <td className="px-4 py-3"><span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>{p.status}</span></td>
                       <td className="px-4 py-3 text-[#6E7191]">{p.date}</td>
+                      <td className="px-4 py-3"><button type="button" onClick={(e) => { e.stopPropagation(); generateFeeReceipt({ receiptNo: p.receiptNo, studentName: p.studentName, studentId: `SA2024-${p.course}-XXX`, course: p.course, category: p.category, amount: p.amount, paidAmount: p.paidAmount, method: p.method, date: p.date, status: p.status }); }} className="rounded p-1 text-[#363473] hover:bg-[#F5F6FA]"><Download className="h-3.5 w-3.5" /></button></td>
                     </tr>); })}
                   {paginated.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-[#A0A3BD]">No records found.</td></tr>}
                 </tbody>

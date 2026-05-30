@@ -9,11 +9,12 @@ import { PageContent } from '@/components/layout/page-content';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpen, Plus, X, Search, ChevronLeft, ChevronRight,
-  RotateCcw, AlertTriangle, CheckCircle, Clock, IndianRupee,
+  RotateCcw, AlertTriangle, CheckCircle, Clock, IndianRupee, Download,
 } from 'lucide-react';
 import {
   BOOKS, INITIAL_BORROW_RECORDS, BOOK_CATEGORIES, FINE_PER_DAY,
 } from '../data';
+import { generateLibraryReceipt } from '@/utils/receipt-generator';
 import type { Book, BorrowRecord, BorrowStatus, NewBorrowForm } from '../data';
 
 // --- Types ---
@@ -281,12 +282,16 @@ export function LibraryPage(): React.JSX.Element {
                         <td className="px-4 py-3"><span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>{record.status}</span></td>
                         <td className="px-4 py-3">{record.fineAmount > 0 ? <span className="font-medium text-red-600">₹{record.fineAmount}</span> : <span className="text-[#A0A3BD]">—</span>}</td>
                         <td className="px-4 py-3">
-                          {record.status !== 'Returned' && (
-                            <button type="button" onClick={() => setShowReturnModal(record.id)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-[#ECEDF3] px-2.5 py-1 text-xs font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors">
-                              <RotateCcw className="h-3 w-3" /> Return
-                            </button>
-                          )}
+                          <div className="flex gap-1">
+                            {record.status !== 'Returned' && (
+                              <button type="button" onClick={() => setShowReturnModal(record.id)}
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#ECEDF3] px-2.5 py-1 text-xs font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors">
+                                <RotateCcw className="h-3 w-3" /> Return
+                              </button>
+                            )}
+                            <button type="button" onClick={() => generateLibraryReceipt({ studentName: record.studentName, idCard: record.idCardNumber, bookTitle: record.bookTitle, issueDate: record.issueDate, dueDate: record.dueDate, returnDate: record.returnDate ?? undefined, fineAmount: record.fineAmount })}
+                              className="rounded p-1 text-[#363473] hover:bg-[#F5F6FA]"><Download className="h-3.5 w-3.5" /></button>
+                          </div>
                         </td>
                       </tr>
                     );

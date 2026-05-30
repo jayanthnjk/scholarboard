@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { INITIAL_EXAMS } from '../data';
 import type { StudentResult } from '../data';
+import { generateExamResultPDF } from '@/utils/receipt-generator';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -147,7 +148,10 @@ export function ExamDetailPage(): React.JSX.Element {
         <div className="rounded-xl border border-[#ECEDF3] bg-white shadow-sm mb-6">
           <div className="flex items-center justify-between p-4 border-b border-[#ECEDF3]">
             <h3 className="text-sm font-semibold text-[#1B1D3A]">Student Results</h3>
-            <span className="text-xs text-[#A0A3BD]">{exam.totalStudents} students</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#A0A3BD]">{exam.totalStudents} students</span>
+              <button type="button" onClick={() => generateExamResultPDF(exam.name, exam.course, exam.subject, exam.date, exam.maxMarks, exam.faculty, exam.results.map((r) => ({ studentName: r.studentName, marksObtained: r.marksObtained, grade: r.grade, status: r.status })))} className="inline-flex items-center gap-1.5 rounded-lg border border-[#ECEDF3] px-3 py-1.5 text-xs font-medium text-[#363473] hover:bg-[#F5F6FA] transition-colors"><Download className="h-3.5 w-3.5" /> Download Results</button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

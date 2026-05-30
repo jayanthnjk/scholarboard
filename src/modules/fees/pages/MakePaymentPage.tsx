@@ -12,8 +12,9 @@ import { usePermission } from '@/hooks/usePermission';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft, CreditCard, CheckCircle,
-  IndianRupee, Shield, AlertCircle,
+  IndianRupee, Shield, AlertCircle, Download,
 } from 'lucide-react';
+import { generateFeeReceipt } from '@/utils/receipt-generator';
 
 // --- Types ---
 
@@ -138,7 +139,8 @@ export function MakePaymentPage(): React.JSX.Element {
             </div>
           </div>
           <div className="mt-6 flex gap-3">
-            <button type="button" onClick={() => navigate('/fees')} className="rounded-lg bg-[#363473] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1B1D3A] transition-colors">Back to Fees</button>
+            <button type="button" onClick={() => generateFeeReceipt({ receiptNo: `RCP/SA/${Date.now()}`, studentName: formData.studentName, studentId: formData.studentId, course: formData.course, category: formData.feeCategory, amount: Number(formData.amount), paidAmount: Number(formData.amount), method: GATEWAYS.find((g) => g.id === selectedGateway)?.name ?? 'Online', date: new Date().toLocaleDateString('en-IN'), status: 'Completed' })} className="inline-flex items-center gap-2 rounded-lg bg-[#363473] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1B1D3A] transition-colors"><Download className="h-4 w-4" /> Download Receipt</button>
+            <button type="button" onClick={() => navigate('/fees')} className="rounded-lg border border-[#ECEDF3] px-5 py-2.5 text-sm font-medium text-[#6E7191] hover:bg-[#F5F6FA]">Back to Fees</button>
             <button type="button" onClick={() => { setStep('details'); setFormData({ studentName: '', studentId: '', course: '', feeCategory: '', amount: '', remarks: '' }); setSelectedGateway(null); }} className="rounded-lg border border-[#ECEDF3] px-5 py-2.5 text-sm font-medium text-[#6E7191] hover:bg-[#F5F6FA]">New Payment</button>
           </div>
         </div>
